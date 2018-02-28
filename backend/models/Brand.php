@@ -22,7 +22,7 @@ class Brand extends ActiveRecord
     {
         return [
             [['name', 'intro', 'logo', 'sort','is_deleted'], 'required'],
-            ['logo', 'file', 'extensions' => ['gif', 'png', 'jpg']],
+
         ];
     }
 }

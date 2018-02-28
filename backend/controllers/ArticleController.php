@@ -3,6 +3,8 @@
 namespace backend\controllers;
 
 use backend\models\Article;
+use backend\models\ArticleDetail;
+use backend\models\ArticleForm;
 use yii\data\Pagination;
 use yii\web\Controller;
 
@@ -25,20 +27,32 @@ class ArticleController extends Controller
 
     }
 
+//    //查看内容
+//    public function actionArticleDetail($id)
+//    {
+//        //获取数据
+//        $model = ArticleDetail::findOne(['article_id' => $id]);
+//        //调用页面,分配数据
+//        return $this->render('index', ['model' => $model]);
+//    }
+
     //添加
     public function actionAdd()
     {
         //实例化
         $request = \Yii::$app->request;
         $model = new Article();
+        $articleDetail = new ArticleDetail();
         //判断
         if ($request->isPost) {
-            //接收数据
+            //分开接收数据
             $model->load($request->post());
+            $articleDetail->load($request->post());
             $model->is_deleted = 0;
             $model->create_time = time();
             if ($model->validate()) {//验证通过
-                //保存
+                //分开保存
+                $articleDetail->save();
                 $model->save();
                 //设置提示信息
                 \Yii::$app->session->setFlash('success', '添加成功');
@@ -53,7 +67,7 @@ class ArticleController extends Controller
         }
 
         //调用视图，分配数据
-        return $this->render('add', ['model' => $model]);
+        return $this->render('add', ['model' => $model, 'articleDetail' => $articleDetail]);
     }
 
     //修改
@@ -62,6 +76,7 @@ class ArticleController extends Controller
         //实例化
         $request = \Yii::$app->request;
         $model = Article::findOne(['id' => $id]);
+        $articleDetail = ArticleDetail::findOne(['article_id' => $id]);
         //判断
         if ($request->isPost) {
             //接收数据
@@ -70,6 +85,7 @@ class ArticleController extends Controller
             $model->create_time = time();
             if ($model->validate()) {//验证通过
                 //保存
+                $articleDetail->save();
                 $model->save();
                 //设置提示信息
                 \Yii::$app->session->setFlash('success', '修改成功');
@@ -84,7 +100,15 @@ class ArticleController extends Controller
         }
 
         //调用视图，分配数据
-        return $this->render('edit', ['model' => $model]);
+        return $this->render('edit', ['model' => $model, 'articleDetail' => $articleDetail]);
     }
 
+    //删除
+    public function actionDelete($id)
+    {
+        $model = Article::findOne(['id' => $id]);
+        $model->is_deleted = 1;
+        $model->save();
+        return $this->redirect(['article/index']);
+    }
 }

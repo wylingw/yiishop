@@ -9,6 +9,8 @@ use yii\web\UploadedFile;
 
 class BrandController extends Controller
 {
+    public $enableCsrfValidation = false;
+
     //列表页
     public function actionIndex()
     {
@@ -29,15 +31,7 @@ class BrandController extends Controller
             //接收数据
             $model->load($request->post());
             $model->is_deleted = 0;
-            //实例化上传组件
-            $model->logo = UploadedFile::getInstance($model, 'logo');
             if ($model->validate()) {//验证通过
-                //保存上传文件
-                $file = '/upload/' . uniqid() . '.' . $model->logo->extension;
-                if ($model->logo->saveAs(\Yii::getAlias('@webroot') . $file, 0)) {
-                    $model->logo = $file;
-                }
-
                 //保存
                 $model->save();
                 //设置提示信息
@@ -67,14 +61,7 @@ class BrandController extends Controller
             //接收数据
             $model->load($request->post());
             $model->is_deleted = 0;
-            //实例化上传组件
-            $model->logo = UploadedFile::getInstance($model, 'logo');
             if ($model->validate()) {//验证通过
-                //保存上传文件
-                $file = '/upload/' . uniqid() . '.' . $model->logo->extension;
-                if ($model->logo->saveAs(\Yii::getAlias('@webroot') . $file, 0)) {
-                    $model->logo = $file;
-                }
                 //保存
                 $model->save();
                 //设置提示信息
@@ -96,10 +83,24 @@ class BrandController extends Controller
     //删除
     public function actionDelete($id)
     {
-        $request = \Yii::$app->request;
         $model = Brand::findOne(['id' => $id]);
         $model->is_deleted = 1;
         $model->save();
         return $this->redirect(['brand/index']);
+    }
+
+    //处理webuploader上传图片
+    public function actionLogoUpload()
+    {
+        //实例化上传图片
+        $uploadedFile = UploadedFile::getInstanceByName('file');
+        //保存文件
+        $fileName = '/upload/' . uniqid() . '.' . $uploadedFile->extension;
+        $res = $uploadedFile->saveAs(\Yii::getAlias('@webroot') . $fileName);
+        if ($res) {
+            return json_encode([
+                'url' => $fileName
+            ]);
+        }
     }
 }

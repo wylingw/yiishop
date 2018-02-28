@@ -15,15 +15,17 @@
             <td><?= $article->id ?></td>
             <td><?= $article->name ?></td>
             <td><?= $article->intro ?></td>
-            <td><?= $article->article_category_id ?></td>
+            <td><?= $article->articleCategory->name ?></td>
             <td><?= $article->sort ?></td>
             <td><?= $article->is_deleted == 0 ? '正常' : '删除' ?></td>
-            <td><?= date('Y-m-d',$article->create_time) ?></td>
+            <td><?= date('Y-m-d', $article->create_time) ?></td>
             <td>
                 <a href="<?= \yii\helpers\Url::to(['article/edit', 'id' => $article->id]) ?>"
                    class="btn btn-info">修改</a>
                 <a href="<?= \yii\helpers\Url::to(['article/delete', 'id' => $article->id]) ?>"
                    class="btn btn-info">删除</a>
+                <a href="<?= \yii\helpers\Url::to(['article-detail/index', 'id' => $article->id]) ?>"
+                   class="btn btn-info">查看内容</a>
             </td>
         </tr>
     <?php endforeach; ?>

@@ -87,7 +87,6 @@ class ArticleCategoryController extends Controller
     //删除
     public function actionDelete($id)
     {
-        $request = \Yii::$app->request;
         $model = ArticleCategory::findOne(['id' => $id]);
         $model->is_deleted = 1;
         $model->save();
