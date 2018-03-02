@@ -13,7 +13,7 @@ class ArticleController extends Controller
     public function actionIndex()
     {
         //分页
-        $query = Article::find();
+        $query = Article::find()->where(['is_deleted' => 0]);
         //实例化
         $pager = new Pagination();
         //总条数
@@ -110,5 +110,20 @@ class ArticleController extends Controller
         $model->is_deleted = 1;
         $model->save();
         return $this->redirect(['article/index']);
+    }
+
+   //应用ueditor
+    public function actions()
+    {
+        return [
+            'upload' => [
+                'class' => 'kucha\ueditor\UEditorAction',
+                'config' => [
+                    "imageUrlPrefix" => "http://admin.yiishop.com",//图片访问路径前缀
+                    "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
+                "imageRoot" => \Yii::getAlias("@webroot"),
+            ],
+            ]
+        ];
     }
 }

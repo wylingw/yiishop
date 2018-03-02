@@ -27,3 +27,10 @@
         </tr>
     <?php endforeach; ?>
 </table>
+<?php
+echo \yii\widgets\LinkPager::widget([
+    'pagination' => $pager,
+    'prevPageLabel' => '上一页',
+    'nextPageLabel' => '下一页',
+    'hideOnSinglePage' => 0,
+]);

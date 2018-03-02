@@ -2,7 +2,7 @@
 $form = \yii\bootstrap\ActiveForm::begin();
 echo $form->field($model, 'name')->textInput();
 echo $form->field($model, 'intro')->textarea();
-echo $form->field($model, 'logo')->textInput();
+echo $form->field($model, 'logo')->hiddenInput();
 /**
  * @var $this \yii\web\View
  */
@@ -11,7 +11,7 @@ $this->registerCssFile('@web/webUploader/webuploader.css');
 $this->registerJsFile('@web/webUploader/webuploader.js',[
     'depends'=>\yii\web\JqueryAsset::className()
 ]);
-
+//输出按钮
 echo <<<html
 <!--dom结构部分-->
 <div id="uploader-demo">
@@ -20,6 +20,7 @@ echo <<<html
     <div id="filePicker">选择图片</div>
 </div>
 html;
+//开始上传文件
 $logo_upload_url = \yii\helpers\Url::to(['brand/logo-upload']);
 $this->registerJs(
   <<<js
