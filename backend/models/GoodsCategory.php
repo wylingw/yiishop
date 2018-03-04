@@ -56,6 +56,7 @@ class GoodsCategory extends \yii\db\ActiveRecord
             'intro' => '简介',
         ];
     }
+    //ztree
     public function behaviors()
     {
         return [

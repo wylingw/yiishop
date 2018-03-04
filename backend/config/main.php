@@ -8,7 +8,7 @@ $params = array_merge(
 
 return [
     //设置语言
-    'language' => 'ch-ZN',
+    'language' => 'zh-CN',
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',

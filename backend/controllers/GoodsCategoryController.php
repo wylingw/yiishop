@@ -44,7 +44,7 @@ class GoodsCategoryController extends \yii\web\Controller
         }
         //获取所有节点数据
         $nodes = GoodsCategory::find()->asArray()->all();
-        $nodes[] = ['id'=>0, 'parent_id'=>0, 'name'=>'顶级分类'];
+        $nodes[] = ['id' => 0, 'parent_id' => 0, 'name' => '顶级分类'];
         //调用页面,分配数据
         return $this->render('add', ['model' => $model, 'nodes' => json_encode($nodes)]);
     }
@@ -56,6 +56,8 @@ class GoodsCategoryController extends \yii\web\Controller
         $request = \Yii::$app->request;
         $model = GoodsCategory::findOne(['id' => $id]);
         if ($request->isPost) {
+            //获取旧的parent_id
+            // $old_parent_id = $model->parent_id;
             //接收数据
             $model->load($request->post());
             if ($model->validate()) {
@@ -63,11 +65,16 @@ class GoodsCategoryController extends \yii\web\Controller
                     //添加子节点
                     $countries = GoodsCategory::findOne(['id' => $model->parent_id]);
                     $model->prependTo($countries);
-                    echo '成功';
                 } else {
+                    // $new_parent_id = $model->parent_id;
                     //根节点
-                    $model->parent_id = 0;
-                    $model->makeRoot();
+                    if ($model->getOldAttribute('parent_id') == 0) {
+                        //旧的parent_id改为新的parent_id时会报错
+                        $model->save();
+                    } else {
+                        $model->makeRoot();
+                    }
+
                 }
                 //设置提示信息
                 \Yii::$app->session->setFlash('success', '修改成功');
@@ -77,7 +84,7 @@ class GoodsCategoryController extends \yii\web\Controller
         }
         //获取所有节点数据
         $nodes = GoodsCategory::find()->asArray()->all();
-        $nodes[] = ['id'=>0, 'parent_id'=>0, 'name'=>'顶级分类'];
+        $nodes[] = ['id' => 0, 'parent_id' => 0, 'name' => '顶级分类'];
 
         //调用页面,分配数据
         return $this->render('edit', ['model' => $model, 'nodes' => json_encode($nodes)]);
