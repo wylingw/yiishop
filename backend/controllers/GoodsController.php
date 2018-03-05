@@ -31,12 +31,12 @@ class GoodsController extends \yii\web\Controller
             if (isset($message['Goods']['sn'])) {
                 $query->andFilterWhere(['like', 'sn', $message['Goods']['sn']]);
             }
-            if (isset($message['Goods']['min'])) {
-                $query->andFilterWhere(['<=', 'min', $message['Goods']['min']]);
-            }
-            if (isset($message['Goods']['max'])) {
-                $query->andFilterWhere(['>=', 'max', $message['Goods']['max']]);
-            }
+//            if (isset($message['Goods']['min'])) {
+//                $query->andFilterWhere(['<=', 'min', $message['Goods']['min']]);
+//            }
+//            if (isset($message['Goods']['max'])) {
+//                $query->andFilterWhere(['>=', 'max', $message['Goods']['max']]);
+//            }
 
         }
 

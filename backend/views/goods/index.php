@@ -6,8 +6,8 @@ $form = \yii\bootstrap\ActiveForm::begin([
 ]);
 echo $form->field($model, 'name')->textInput(['placeholder' => '商品名称', 'style' => 'width:130px'])->label(false);
 echo $form->field($model, 'sn')->textInput(['placeholder' => '货号', 'style' => 'width:130px'])->label(false);
-echo $form->field($model, 'min')->textInput(['placeholder' => '价格', 'style' => 'width:130px'])->label(false);
-echo $form->field($model, 'max')->textInput(['placeholder' => '价格', 'style' => 'width:130px'])->label(false);
+//echo $form->field($model, 'min')->textInput(['placeholder' => '价格', 'style' => 'width:130px'])->label(false);
+//echo $form->field($model, 'max')->textInput(['placeholder' => '价格', 'style' => 'width:130px'])->label(false);
 echo '<button class="btn btn-info">搜索</button>';
 \yii\bootstrap\ActiveForm::end();
 ?>
