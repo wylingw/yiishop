@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 
+use backend\filters\RbacFilters;
 use backend\models\Brand;
 use yii\data\Pagination;
 use yii\web\Controller;
@@ -20,7 +21,7 @@ class BrandController extends Controller
     public function actionIndex()
     {
         //分页
-        $query = Brand::find();
+        $query = Brand::find()->where(['is_deleted' => 0]);
         //实例化
         $pager = new Pagination();
         //总条数
@@ -92,19 +93,23 @@ class BrandController extends Controller
         }
 
         //调用视图，分配数据
-        return $this->render('edit', ['model' => $model]);
+        return $this->render('add', ['model' => $model]);
     }
 
     //删除
     public function actionDelete($id)
     {
         $model = Brand::findOne(['id' => $id]);
-        $model->is_deleted = 1;
-        $model->save();
-        return $this->redirect(['brand/index']);
+        if ($model) {
+            $model->is_deleted = 1;
+            $model->save();
+            echo 1;
+        } else {
+            echo 0;
+        }
     }
 
-    //处理webuploader上传图片
+    //处理webuploader上传图片,并上传到七牛云
     public function actionLogoUpload()
     {
         //实例化上传图片
@@ -114,7 +119,7 @@ class BrandController extends Controller
         $res = $uploadedFile->saveAs(\Yii::getAlias('@webroot') . $fileName);
         if ($res) {
             //图片上传到七牛云
-            // 需要填写你的 Access Key 和 Secret Key
+            //>>>1. 需要填写你的 Access Key 和 Secret Key
             $accessKey = "IUIg3xvfZl9XNi-VOVc36zOFD5q2vFBYvQHef4gY";
             $secretKey = "ZnfIqCNx1sPF4J75Tbmg8yZKriqbStB--eOJ41XY";
             $bucket = "yiishop";
@@ -141,6 +146,16 @@ class BrandController extends Controller
             }
 
         }
+    }
+    //配过滤器
+    public function behaviors()
+    {
+        return [
+            'rbac'=>[
+                'class'=>RbacFilters::class,
+                 'except' => ['login', 'logout', 'change', 'captcha', 'index','add','logo-upload']
+            ]
+        ];
     }
 
     //图片上传到七牛云
@@ -170,4 +185,5 @@ class BrandController extends Controller
 //            var_dump($ret);
 //        }
 //    }
+
 }

@@ -27,14 +27,6 @@ class ArticleController extends Controller
 
     }
 
-//    //查看内容
-//    public function actionArticleDetail($id)
-//    {
-//        //获取数据
-//        $model = ArticleDetail::findOne(['article_id' => $id]);
-//        //调用页面,分配数据
-//        return $this->render('index', ['model' => $model]);
-//    }
 
     //添加
     public function actionAdd()
@@ -107,12 +99,18 @@ class ArticleController extends Controller
     public function actionDelete($id)
     {
         $model = Article::findOne(['id' => $id]);
-        $model->is_deleted = 1;
-        $model->save();
-        return $this->redirect(['article/index']);
+        if ($model) {
+            $model->is_deleted = 1;
+            $model->save();
+            echo 1;
+        } else {
+            echo 0;
+        }
+
+
     }
 
-   //应用ueditor
+    //应用ueditor
     public function actions()
     {
         return [
@@ -120,9 +118,9 @@ class ArticleController extends Controller
                 'class' => 'kucha\ueditor\UEditorAction',
                 'config' => [
                     "imageUrlPrefix" => "http://admin.yiishop.com",//图片访问路径前缀
-                    "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}" ,//上传保存路径
-                "imageRoot" => \Yii::getAlias("@webroot"),
-            ],
+                    "imagePathFormat" => "/upload/image/{yyyy}{mm}{dd}/{time}{rand:6}",//上传保存路径
+                    "imageRoot" => \Yii::getAlias("@webroot"),
+                ],
             ]
         ];
     }

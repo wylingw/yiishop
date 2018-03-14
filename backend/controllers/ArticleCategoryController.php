@@ -12,7 +12,7 @@ class ArticleCategoryController extends Controller
     public function actionIndex()
     {
         //分页
-        $query = ArticleCategory::find();
+        $query = ArticleCategory::find()->where(['is_deleted'=>0]);
         //实例化
         $pager = new Pagination();
         //总条数
@@ -88,8 +88,13 @@ class ArticleCategoryController extends Controller
     public function actionDelete($id)
     {
         $model = ArticleCategory::findOne(['id' => $id]);
-        $model->is_deleted = 1;
-        $model->save();
-        return $this->redirect(['article-category/index']);
+        if ($model) {
+            $model->is_deleted = 1;
+            $model->save();
+            echo 1;
+        } else {
+            echo 0;
+        }
+
     }
 }

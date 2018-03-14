@@ -93,8 +93,7 @@ class GoodsCategoryController extends \yii\web\Controller
     //删除
     public function actionDelete($id)
     {
-        //实例化
-        $request = \Yii::$app->request;
+
         $model = GoodsCategory::findOne(['id' => $id]);
         $model->deleteWithChildren();
         //跳转

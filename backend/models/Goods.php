@@ -25,6 +25,8 @@ use Yii;
  */
 class Goods extends \yii\db\ActiveRecord
 {
+    public $min;
+    public $max;
 
     /**
      * @inheritdoc
@@ -32,10 +34,12 @@ class Goods extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [[ 'logo', 'goods_category_id', 'brand_id', 'market_price',  'stock', 'is_on_sale', 'sort'], 'required'],
+            [['logo', 'goods_category_id', 'brand_id', 'market_price','shop_price','stock', 'is_on_sale', 'sort'], 'required'],
             [['goods_category_id', 'brand_id', 'stock', 'is_on_sale', 'status', 'sort', 'create_time', 'view_times'], 'integer'],
             [['market_price', 'shop_price'], 'number'],
-            [['name', 'sn'], 'string', 'max' => 20],
+            [[ 'name','sn'], 'string', 'max' => 255],
+            [['min', 'max'], 'safe'],
+
 
         ];
     }
@@ -79,6 +83,7 @@ class Goods extends \yii\db\ActiveRecord
         }
         return $tmp;
     }
+
     //品牌分类
     public function getBrand()
     {

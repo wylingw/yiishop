@@ -59,7 +59,12 @@ uploader.on( 'uploadSuccess', function( file,response ) {
 });
 js
 );
-echo '<img id="logo_view" />';
+if ($model->logo) {
+    echo '<img id="logo_view" src="'.$model->logo.'" width="150px" />';
+} else {
+    echo '<img id="logo_view" />';
+}
+
 
 echo $form->field($model, 'sort')->textInput();
 echo '<button class="btn btn-info">提交</button>';

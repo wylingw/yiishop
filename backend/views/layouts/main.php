@@ -37,12 +37,14 @@ AppAsset::register($this);
         ],
     ]);
     $menuItems = [
-        ['label' => '主页', 'url' => ['/site/index']],
-        ['label' => '修改', 'url' => ['/admin/change']],
+//        ['label' => '主页', 'url' => ['/site/index']],
+
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => '登录', 'url' => ['/admin/login']];
     } else {
+        $menuItems=\backend\models\Menu::getMenus($menuItems);
+        $menuItems[]=['label' => '修改', 'url' => ['/admin/change']];
         $menuItems[] = '<li>'
             . Html::beginForm(['/admin/logout'], 'post')
             . Html::submitButton(

@@ -19,6 +19,9 @@ use Yii;
  */
 class GoodsCategory extends \yii\db\ActiveRecord
 {
+    public $categoryChildrens;
+    public $childrensSon;
+
     /**
      * @inheritdoc
      */
@@ -34,7 +37,7 @@ class GoodsCategory extends \yii\db\ActiveRecord
     {
         return [
             [['tree', 'lft', 'rgt', 'depth', 'parent_id'], 'integer'],
-            [['name','parent_id'], 'required'],
+            [['name', 'parent_id'], 'required'],
             [['intro'], 'string'],
             [['name'], 'string', 'max' => 50],
         ];
@@ -56,6 +59,7 @@ class GoodsCategory extends \yii\db\ActiveRecord
             'intro' => '简介',
         ];
     }
+
     //ztree
     public function behaviors()
     {

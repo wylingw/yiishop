@@ -11,7 +11,7 @@
         <td>操作</td>
     </tr>
     <?php foreach ($articles as $article): ?>
-        <tr>
+        <tr data-id="<?= $article->id ?>">
             <td><?= $article->id ?></td>
             <td><?= $article->name ?></td>
             <td><?= $article->intro ?></td>
@@ -22,8 +22,7 @@
             <td>
                 <a href="<?= \yii\helpers\Url::to(['article/edit', 'id' => $article->id]) ?>"
                    class="btn btn-info">修改</a>
-                <a href="<?= \yii\helpers\Url::to(['article/delete', 'id' => $article->id]) ?>"
-                   class="btn btn-info">删除</a>
+                <a href="javascript:;" class="btn btn-info btn_del">删除</a>
                 <a href="<?= \yii\helpers\Url::to(['article-detail/index', 'id' => $article->id]) ?>"
                    class="btn btn-info">查看内容</a>
             </td>
@@ -38,3 +37,24 @@ echo \yii\widgets\LinkPager::widget([
     'nextPageLabel' => '下一页',
     'hideOnSinglePage' => 0,
 ]);
+
+/**
+ * @var $this \yii\web\View
+ */
+$url = \yii\helpers\Url::to(['article/delete']);
+$this->registerJs(
+    <<<JS
+            $(".btn_del").click(function() {
+              if (confirm('确定删除吗?删除后无法恢复')){
+                   var tr=$(this).closest('tr');
+                   var id=tr.attr('data-id');
+                   $.get("{$url}",{id:id},function(data) {
+                     if (data==1){
+                      tr.fadeOut();
+                }
+              })
+              }
+            })
+JS
+
+);

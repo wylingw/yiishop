@@ -2,11 +2,13 @@
 
 namespace backend\controllers;
 
+use backend\filters\RbacFilters;
 use backend\models\Admin;
 use backend\models\Password;
 use frontend\models\LoginForm;
 use yii\captcha\CaptchaAction;
 use yii\filters\AccessControl;
+use yii\web\HttpException;
 
 class AdminController extends \yii\web\Controller
 {
@@ -36,16 +38,30 @@ class AdminController extends \yii\web\Controller
         //实例化\
         $request = \Yii::$app->request;
         $model = new Admin();
+        //使用场景
+        $model->scenario = Admin::SCENARIO_ADD;
         if ($request->isPost) {
             //加载数据
             $model->load($request->post());
+
             if ($model->validate()) {
-                //处理数据
-                $model->created_at = time();
-                $model->auth_key = \Yii::$app->security->generateRandomString();
-                $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password_hash);
+//                //处理数据
+//                $model->created_at = time();
+//                $model->auth_key = \Yii::$app->security->generateRandomString();
+//                $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password);
                 //保存
                 $model->save();
+                //把选中的角色存入数据表
+                $authManager = \Yii::$app->authManager;
+                if (is_array($model->roles)) {
+                    foreach ($model->roles as $roleName) {
+                        $roles = $authManager->getRole($roleName);
+                        //给用户添加角色
+                        $id = $model->id;
+                        //var_dump($this->id);die();
+                        $authManager->assign($roles, $id);
+                    }
+                }
                 //信息提示
                 \Yii::$app->session->setFlash('success', '添加成功');
                 //跳转
@@ -63,24 +79,50 @@ class AdminController extends \yii\web\Controller
         //实例化\
         $request = \Yii::$app->request;
         $model = Admin::findOne(['id' => $id]);
+        //获取该用户所有角色回显
+        $authManager = \Yii::$app->authManager;
+        $roles = $authManager->getRolesByUser($id);
+        if (is_array($roles)) {
+            $model->roles = [];
+            foreach ($roles as $role) {
+                $model->roles[] = $role->name;
+            }
+        }
+        if (!$model) {
+            throw new HttpException('404', '该用户不存在');
+        }
+        //指定使用场景
+        $model->scenario = Admin::SCENARIO_EDIT;
         if ($request->isPost) {
             //加载数据
             $model->load($request->post());
+
             if ($model->validate()) {
+                //清除原来的所有角色
+                $authManager->revokeAll($id);
+                // var_dump($model->roles);die();
+                //给用户关联角色
+                if (is_array($model->roles)) {
+                    foreach ($model->roles as $rolesNmae) {
+                        $roles = $authManager->getRole($rolesNmae);
+                        //给用户赋予角色
+                        $authManager->assign($roles, $id);
+                    }
+                }
                 //处理数据
                 $model->updated_at = time();
                 $model->password_hash = \Yii::$app->security->generatePasswordHash($model->password_hash);
                 //保存
                 $model->save();
                 //信息提示
-                \Yii::$app->session->setFlash('success', '添加成功');
+                \Yii::$app->session->setFlash('success', '修改成功');
                 //跳转
                 return $this->redirect(['admin/index']);
             }
         }
 
         //调用视图,分配数据
-        return $this->render('edit', ['model' => $model]);
+        return $this->render('add', ['model' => $model]);
     }
 
     //删除
@@ -93,7 +135,7 @@ class AdminController extends \yii\web\Controller
 
     }
 
-    //登录
+//登录
     public function actionLogin()
     {
         //实例化
@@ -105,7 +147,6 @@ class AdminController extends \yii\web\Controller
             if ($model->validate()) {
                 //验证用户名和密码
                 if ($model->login()) {//登录成功
-
                     //设置提示信息
                     \Yii::$app->session->setFlash('success', '登录成功');
                     //跳转
@@ -116,7 +157,6 @@ class AdminController extends \yii\web\Controller
                 exit;
             }
         }
-
         //调用页面
         return $this->render('login', ['model' => $model]);
     }
@@ -187,34 +227,17 @@ class AdminController extends \yii\web\Controller
             //根据id找到当前用户的信息
             $id = \Yii::$app->user->id;
             $user = Admin::findOne(['id' => $id]);
-            //$admin->old_password = \Yii::$app->security->generatePasswordHash($admin->old_password);
-//            var_dump(\Yii::$app->security->validatePassword($admin->old_password, $user->password_hash));
-//            die();
-            if (\Yii::$app->security->validatePassword($admin->old_password, $user->password_hash)) {
-                //输入旧密码等于数据库中的密码
-                if ($admin->re_password !== $admin->new_password) {
-                    echo '两次输入的密码不一致,请重新输入';
-                } else {
-                    //重新把新密码赋值,存入数据库
-                    $admin->new_password = \Yii::$app->security->generatePasswordHash($admin->new_password);
-                    $user->password_hash = $admin->new_password;
-//                    var_dump($user->password_hash);
-//                    die();
-                    if ($user->validate()) {
-                        $user->save();
-                        //设置提示信息
-                        \Yii::$app->session->setFlash('success', '修改密码成功');
-                        //跳转
-                        return $this->redirect(['admin/index']);
-                    } else {
-                        var_dump($user->getErrors());
-                        die();
-                    }
-
-                }
-
+            if ($user->validate()) {
+                //重新把新密码赋值,存入数据库
+                $user->password_hash = \Yii::$app->security->generatePasswordHash($admin->new_password);
+                $user->save();
+                //设置提示信息
+                \Yii::$app->session->setFlash('success', '修改密码成功');
+                //跳转
+                return $this->redirect(['admin/index']);
             } else {
-                echo '密码输入不正确';
+                var_dump($user->getErrors());
+                die();
             }
         }
 
@@ -223,4 +246,16 @@ class AdminController extends \yii\web\Controller
         return $this->render('change', ['admin' => $admin]);
     }
 
+//过滤器
+    public function behaviors()
+    {
+        return [
+            'rbac' => [
+                'class' => RbacFilters::class,
+                //默认情况对所有操作生效
+                //排除不需要授权的操作
+                'except' => ['login', 'logout', 'change', 'captcha', 'index']
+            ]
+        ];
+    }
 }

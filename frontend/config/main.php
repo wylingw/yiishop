@@ -8,6 +8,7 @@ $params = array_merge(
 
 return [
     'language' => 'ch-ZN',
+    'layout'=>false,
     'id' => 'app-frontend',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log'],
@@ -17,7 +18,7 @@ return [
             'csrfParam' => '_csrf-frontend',
         ],
         'user' => [
-            'identityClass' => 'common\models\User',
+            'identityClass' => 'frontend\models\Users',
             'enableAutoLogin' => true,
             'identityCookie' => ['name' => '_identity-frontend', 'httpOnly' => true],
         ],
@@ -41,9 +42,17 @@ return [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+           // 'suffix' => '.html',
             'rules' => [
             ],
         ],
+        'sms' => [
+            'class'=>\frontend\aliyun\SmsHander::class,
+            'ak'=>'LTAI1XWBekWGh0QC',
+            'sk'=>'l5c435H3oYlfKI83PRQaWUB38nwz9E',
+            'sign'=>'小花茶坊',
+            'template'=>'SMS_126895026'
+        ]
 
     ],
     'params' => $params,

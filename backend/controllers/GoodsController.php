@@ -2,6 +2,7 @@
 
 namespace backend\controllers;
 
+use backend\filters\RbacFilters;
 use backend\models\Goods;
 use backend\models\GoodsCategory;
 use backend\models\GoodsDayCount;
@@ -20,25 +21,21 @@ class GoodsController extends \yii\web\Controller
         //实例化
         $request = \Yii::$app->request;
         $message = $request->get();
-   // var_dump($message);exit();
-      //var_dump($message['Goods']['name']);exit();
+       //var_dump($request->get());die();
         $query = Goods::find()->where(['status' => 1]);
-        if (!empty($message)) {
-
-            if (isset($message['Goods']['name'])) {
-                $query->andFilterWhere(['like', 'name', $message['Goods']['name']]);
-            }
-            if (isset($message['Goods']['sn'])) {
-                $query->andFilterWhere(['like', 'sn', $message['Goods']['sn']]);
-            }
-//            if (isset($message['Goods']['min'])) {
-//                $query->andFilterWhere(['<=', 'min', $message['Goods']['min']]);
-//            }
-//            if (isset($message['Goods']['max'])) {
-//                $query->andFilterWhere(['>=', 'max', $message['Goods']['max']]);
-//            }
-
+        if (isset($message['Goods']['name'])) {
+            $query->andFilterWhere(['like', 'name', $message['Goods']['name']]);
         }
+        if (isset($message['Goods']['sn'])) {
+            $query->andFilterWhere(['like', 'sn', $message['Goods']['sn']]);
+        }
+        if (isset($message['Goods']['min'])) {
+            $query->andFilterWhere(['>=', 'shop_price', $message['Goods']['min']]);
+        }
+        if (isset($message['Goods']['max'])) {
+            $query->andFilterWhere(['<=', 'shop_price', $message['Goods']['max']]);
+        }
+
 
         //分页
         $pager = new Pagination();
@@ -80,7 +77,8 @@ class GoodsController extends \yii\web\Controller
                 //设置提示信息
                 \Yii::$app->session->setFlash('success', '添加成功');
                 //跳转
-                return $this->redirect(['goods/index']);
+               // return $this->redirect(['goods/index']);
+                return $this->refresh();
             }
         }
         //查询所有节点数据
@@ -126,10 +124,12 @@ class GoodsController extends \yii\web\Controller
     public function actionDelete($id)
     {
         $model = Goods::findOne(['id' => $id]);
-        if ($model->validate()){
+        if ($model) {
             $model->status = 0;
             $model->save();
-            return $this->redirect(['goods/index']);
+            echo 1;
+        }else{
+            echo 0;
         }
 
     }
@@ -200,6 +200,18 @@ class GoodsController extends \yii\web\Controller
         //跳转
         return $this->redirect(['goods/gallery', 'id' => $goods_id]);
 
+    }
+    //过滤器
+    public function behaviors()
+    {
+        return [
+            'rbac' => [
+                'class' =>RbacFilters::class,
+                //默认情况对所有操作生效
+                //排除不需要授权的操作
+                'except' => ['login', 'logout', 'change', 'captcha', 'index','add','logo-upload','gallery','upload']
+            ]
+        ];
     }
 
 

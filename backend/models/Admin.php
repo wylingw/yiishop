@@ -22,7 +22,11 @@ use yii\web\IdentityInterface;
  */
 class Admin extends \yii\db\ActiveRecord implements IdentityInterface
 {
-    public
+    public $password;
+    public $roles;
+    //定义场景
+    const SCENARIO_ADD = 'add';
+    const SCENARIO_EDIT = 'edit';
 
     /**
      * @inheritdoc
@@ -38,7 +42,7 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
-            [['username', 'password_hash', 'email'], 'required'],
+            [['username', 'email'], 'required'],
             [['status', 'created_at', 'updated_at', 'last_login_time'], 'integer'],
             [['username', 'password_hash', 'password_reset_token', 'email'], 'string', 'max' => 255],
             [['auth_key'], 'string', 'max' => 32],
@@ -46,6 +50,10 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
             [['username'], 'unique'],
             [['email'], 'unique'],
             [['password_reset_token'], 'unique'],
+            ['password', 'required', 'on' => self::SCENARIO_ADD],
+            ['password', 'safe', 'on' => self::SCENARIO_EDIT],
+            [['roles'], 'safe'],
+
         ];
     }
 
@@ -58,7 +66,7 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
             'id' => 'ID',
             'username' => '用户名',
             'auth_key' => 'Auth Key',
-            'password_hash' => '密码',
+            'password' => '密码',
             'password_reset_token' => 'Password Reset Token',
             'email' => '邮箱',
             'status' => 'Status',
@@ -66,9 +74,36 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
             'updated_at' => '更新时间',
             'last_login_time' => '最后登录时间',
             'last_login_ip' => '最后登录ip',
+            'roles' => '分配角色',
 
         ];
     }
+
+    //获取角色
+    public static function getRoles()
+    {
+        $authManager = Yii::$app->authManager;
+        $roles = $authManager->getRoles();
+        $tmp = [];
+        foreach ($roles as $role) {
+            $tmp[$role->name] = $role->name;
+        }
+        return $tmp;
+    }
+
+    //保存之前
+    public function beforeSave($insert)
+    {
+        if ($insert) {
+            //处理数据
+            $this->created_at = time();
+            $this->auth_key = \Yii::$app->security->generateRandomString();
+            $this->password_hash = \Yii::$app->security->generatePasswordHash($this->password);
+        }
+
+        return parent::beforeSave($insert);
+    }
+
 
     /**
      * Finds an identity by the given ID.
@@ -132,6 +167,6 @@ class Admin extends \yii\db\ActiveRecord implements IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->getAuthKey() === $authKey;
+        return $this->getAuthKey() == $authKey;
     }
 }

@@ -31,7 +31,7 @@ class LoginForm extends Model
             [['username', 'password_hash'], 'required'],
             //验证码
             ['code', 'captcha', 'captchaAction' => 'admin/captcha',],
-            ['remember', 'safe']
+            ['remember', 'safe'],
 
         ];
     }
@@ -52,7 +52,6 @@ class LoginForm extends Model
                 //密码错误，设置提示信息
                 $this->addError('password', '账号或密码错误');
             }
-
         } else {
             //账户名不存在，设置提示信息
             $this->addError('username', '账号或密码错误');
