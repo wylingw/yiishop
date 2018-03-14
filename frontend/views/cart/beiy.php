@@ -27,3 +27,21 @@
         </tr>
     <?php endforeach; ?>
 <?php endif; ?>
+
+
+
+
+<script type="text/javascript">
+    var url = "<?=\yii\helpers\Url::to(['goods-category/delete'])?>";
+    $(".btn_del").click(function () {
+        if (confirm('确定删除吗?删除后无法恢复')) {
+            var tr = $(this).closest('tr');
+            var id = tr.attr('data-id');
+            $.get(url, {id: id}, function (data) {
+                if (data == 1) {
+                    tr.fadeOut();
+                }
+            })
+        }
+    });
+</script>

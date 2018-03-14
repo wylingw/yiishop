@@ -83,8 +83,8 @@
                             <a href="javascript:;" class="add_num"></a>
                         </td>
 
-                        <td class="col5">￥<span>899</span></td>
-                        <td class="col6"><a href="javascript:;" class="btn_del">删除</a></td>
+                        <td class="col5">￥<span><?= $good->shop_price * $carts[$good->id] ?></span></td>
+                        <td class="col6"><a href="javascript:;">删除</a></td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -105,10 +105,11 @@
                             <input type="text" name="amount" value="<?= $amount[$good->id] ?>" class="amount"/>
                             <a href="javascript:;" class="add_num"></a>
                         </td>
-
+                        <input type="hidden" name="<?= Yii::$app->request->csrfParam ?>"
+                               value="<?= Yii::$app->request->csrfToken ?>"/>
 
                         <td class="col5">￥<span><?= $good->shop_price * $amount[$good->id] ?></span></td>
-                        <td class="col6"><a href="javascript:;" class="btn_del">删除</a></td>
+                        <td class="col6"><a href="javascript:;" ">删除</a></td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>
@@ -154,19 +155,6 @@
     </p>
 </div>
 <!-- 底部版权 end -->
-<script type="text/javascript">
-    var url = "<?=\yii\helpers\Url::to(['goods-category/delete'])?>";
-    $(".btn_del").click(function () {
-        if (confirm('确定删除吗?删除后无法恢复')) {
-            var tr = $(this).closest('tr');
-            var id = tr.attr('data-id');
-            $.get(url, {id: id}, function (data) {
-                if (data == 1) {
-                    tr.fadeOut();
-                }
-            })
-        }
-    });
-</script>
+
 </body>
 </html>

@@ -23,7 +23,10 @@ $(function(){
 		});
 
 		$("#total").text(total.toFixed(2));
+        //点击减少
+        changeAmount($(this).closest('tr').attr('data-id'),$(amount).val());
 	});
+
 
 
 	//增加
@@ -40,6 +43,8 @@ $(function(){
 		});
 
 		$("#total").text(total.toFixed(2));
+        //增加点击事件
+        changeAmount($(this).closest('tr').attr('data-id'),$(amount).val());
 	});
 
 	//直接输入
@@ -58,9 +63,19 @@ $(function(){
 		});
 
 		$("#total").text(total.toFixed(2));
+        //直接输入点击事件
+        changeAmount($(this).closest('tr').attr('data-id'),$(amount).val());
 
 	});
-	//向后台发送数据
+    //删除
+    $(".col6").click(function () {
+        if (confirm('确定删除吗?删除后无法恢复')) {
+            changeAmount($(this).closest('tr').attr('data-id'),0);
+
+        }
+    });
+
+    //向后台发送数据
     function changeAmount(goods_id,amount){
         $.get("/goods/ajax-cart",{goods_id:goods_id,amount:amount});
     }

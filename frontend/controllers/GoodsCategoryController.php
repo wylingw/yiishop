@@ -144,9 +144,6 @@ class GoodsCategoryController extends Controller
             }
             //取出所有商品id
             $id = array_keys($carts);
-
-
-            //取出所有商品的数量
             if (isset($id)) {
                 //查询商品信息
                 $goods = Goods::find()->where(['id' => $id])->all();
@@ -165,14 +162,34 @@ class GoodsCategoryController extends Controller
             } else {
                 $carts = [];
             }
-            // var_dump($carts);die();
+
             $id = array_keys($carts);
-            $goods = Cart::find()->select('goods_id,amount')->where(['goods_id' => $id])->all();
-            //var_dump($goods[$id]);die();
+            $goods = Cart::find()->select('goods_id,amount')->andWhere(['goods_id' => $id])->all();
+            //var_dump($goods);die();
+
             if ($goods) {
                 foreach ($goods as $good) {
-                    //更新后的数量等于数据库原量+购物车数量
+                    $goods_id = $good->goods_id;
+                }
+                if (array_key_exists($goods_id, $carts)) {
+                    $model = Cart::find()->where(['goods_id' => $goods_id])->all();
+                    foreach ($model as $mo) {
+                        $count = $good->amount + $carts[$goods_id];
+                        $mo->amount = $count;
+                        //var_dump($mo->amount);die();
+                    }
+                    $mo->updateAttributes(['amount' => $mo->amount]);
+                    //清空cookie
+                    $cookie = new Cookie();
+                    $cookie->name = 'carts';
+                    $cookies = \Yii::$app->response->cookies;
+                    $cookies->remove($cookie);
 
+
+                } else {
+                    $m = new Cart();
+                    $m->amount = $carts[$goods_id];
+                    $m->save();
                 }
             }
 
@@ -201,31 +218,6 @@ class GoodsCategoryController extends Controller
 
     }
 
-    //删除商品
-    public function actionDelete($id)
-    {
-        if (\Yii::$app->user->isGuest) {
-            //未登录
-            if ($id) {
-                $cookie = \Yii::$app->response->cookies;
-                $cookie->remove($id);
-                echo 1;
-            } else {
-                echo 2;
-            }
-
-
-        } else {
-            //已登录
-            if ($id) {
-                $model = Cart::findOne(['goods_id' => $id]);
-                $model->delete();
-                echo 1;
-            } else {
-                echo 0;
-            }
-        }
-    }
 
     //商品在购物车里增加或减少
     public function actionAjaxCart($goods_id, $amount)
@@ -241,9 +233,11 @@ class GoodsCategoryController extends Controller
             }
             if ($amount) {
                 $carts[$goods_id] = $amount;
+                var_dump($carts[$goods_id]);
+                die();
+            } else {
+                unset($carts[$goods_id]);
             }
-
-
             //将购物车数据保存到cookie
             $cookie = new Cookie();
             $cookie->name = 'carts';
@@ -319,8 +313,9 @@ class GoodsCategoryController extends Controller
                 try {
                     //保存
                     $order->save();
+                    $id = \Yii::$app->user->id;
                     //保存订单详情表
-                    $carts = Cart::find()->where(['user_id' => \Yii::$app->user->id])->all();
+                    $carts = Cart::find()->where(['user_id' => $id])->all();
                     foreach ($carts as $cart) {
                         $goods = Goods::findOne(['id' => $cart->goods_id]);
                         //库存
@@ -335,12 +330,29 @@ class GoodsCategoryController extends Controller
                             $orderGoods = new OrderGoods();
                             $orderGoods->order_id = $order->id;
                             $orderGoods->goods_id = $goods->id;
-                            $orderGoods->goods_name=$goods->name;
+                            $orderGoods->goods_name = $goods->name;
+                            $orderGoods->logo = $goods->logo;
+                            $orderGoods->price = $goods->shop_price;
+                            $orderGoods->amount = $cart->amount;
+                            $orderGoods->total = $orderGoods->price * $orderGoods->amount;
+                            //订单总金额
+                            $order->total += $orderGoods->total;
+                            $orderGoods->save();
                         }
                     }
+                    //加运费
+                    $d = Delivery::findOne(['delivery_id' => $order->delivery_id]);
+                    $order->total = $d->delivery_price;
+                    //保存
+                    $order->save();
+                    //清空购物车
+                    Cart::deleteAll(['user_id' => $id]);
 
+                    //提交事务
+                    $transaction->commit();
                 } catch (Exception $e) {
-
+                    //事务回滚
+                    $transaction->rollBack();
                 }
 
 
