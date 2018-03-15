@@ -82,6 +82,6 @@ $(function () {
 
     //向后台发送数据
     function changeAmount(goods_id, amount) {
-        $.get("/goods/ajax-cart", {goods_id: goods_id, amount: amount});
+        $.get("/goods-category/ajax-cart", {goods_id: goods_id, amount: amount});
     }
 });

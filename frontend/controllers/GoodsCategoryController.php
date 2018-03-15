@@ -268,7 +268,9 @@ class GoodsCategoryController extends Controller
             if ($model) {
                 if ($amount != 0) {
                     $model->amount = $amount;
+                   // var_dump($model->getErrors());die();
                     $model->save();
+                    var_dump($model->getErrors());die();
                 } else {
                     $model->delete();
                 }
