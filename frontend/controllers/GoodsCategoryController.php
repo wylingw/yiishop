@@ -350,7 +350,7 @@ class GoodsCategoryController extends Controller
                         //库存
                         if ($goods->stock < $cart->amount) {
                             //库存不足,跑出异常
-                            throw new Exception("商品" . $goods->name . "库存不足,请选购其他商品");
+                            throw new Exception("商品库存不足,请选购其他商品");
                         } else {
                             //减库存
                             $goods->stock -= $cart->amount;

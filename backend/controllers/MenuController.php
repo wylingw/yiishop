@@ -36,6 +36,8 @@ class MenuController extends \yii\web\Controller
                 \Yii::$app->session->setFlash('success', '添加成功');
                 //跳转
                 return $this->redirect(['menu/index']);
+            }else{
+                var_dump($model->getErrors());die();
             }
         }
 
