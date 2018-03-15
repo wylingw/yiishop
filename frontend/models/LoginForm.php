@@ -30,7 +30,7 @@ class LoginForm extends Model
             [['username', 'password'], 'required'],
             //验证码
 //            ['code', 'captcha', 'captchaAction' => 'users/captcha',],
-            ['remember', 'safe'],
+            [['remember'], 'safe'],
 
         ];
     }

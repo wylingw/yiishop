@@ -152,9 +152,6 @@
     </p>
 </div>
 <!-- 底部版权 end -->
-
-</body>
-</html>
 <script src="http://static.runoob.com/assets/jquery-validation-1.14.0/lib/jquery.js"></script>
 <script src="http://static.runoob.com/assets/jquery-validation-1.14.0/dist/jquery.validate.min.js"></script>
 <script type="text/javascript">
@@ -203,3 +200,5 @@
         return h == hash;//返回验证结果 true false
     }, "验证码错误");
 </script>
+</body>
+</html>

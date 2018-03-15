@@ -227,14 +227,15 @@ class AdminController extends \yii\web\Controller
             //根据id找到当前用户的信息
             $id = \Yii::$app->user->id;
             $user = Admin::findOne(['id' => $id]);
-            if ($user->validate()) {
+            if ($admin->validate()) {
                 //重新把新密码赋值,存入数据库
                 $user->password_hash = \Yii::$app->security->generatePasswordHash($admin->new_password);
-                $user->save();
-                //设置提示信息
-                \Yii::$app->session->setFlash('success', '修改密码成功');
-                //跳转
-                return $this->redirect(['admin/index']);
+                $user->updateAttributes(['password_hash'=>$user->password_hash]);
+                //注销
+                \Yii::$app->user->logout();
+                \Yii::$app->session->setFlash('success','密码修改成功,请使用新密码登录');
+                return $this->redirect(['admin/login']);
+
             } else {
                 var_dump($user->getErrors());
                 die();

@@ -15,8 +15,8 @@ class Password extends Model
         return [
             [['old_password', 'new_password', 're_password'], 'required'],
            ['old_password', 'validatePassword'],
-           ['re_password', 'validateRePassword'],
-           // ['re_password','compare','compareAttribute'=>'new_password','message'=>'两次密码输入不一致']
+
+            ['re_password','compare','compareAttribute'=>'new_password','message'=>'两次密码输入不一致'],
 
         ];
     }
@@ -31,15 +31,6 @@ class Password extends Model
         }
     }
 
-    //自定义验证新密码是否等于确认密码
-    public function validateRePassword()
-    {
-        $res=$this->new_password == $this->re_password;
-        if ( $res==false){
-            $this->addError('re_password', '两次密码输入不一致');
-        }
-
-    }
 
     public function attributeLabels()
     {
