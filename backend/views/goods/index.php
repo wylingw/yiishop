@@ -29,7 +29,7 @@ echo '<button class="btn btn-info">搜索</button>';
                 <td><?= $good->id ?></td>
                 <td><?= $good->name ?></td>
                 <td><?= $good->sn ?></td>
-                <td><img src="<?= $good->logo ?>" alt="" style="width: 60px" class="img-circle"></td>
+                <td><img src="<?="http://admin.yiishop.com". $good->logo ?>" alt="" style="width: 60px" class="img-circle"></td>
                 <td><?= $good->shop_price ?></td>
                 <td>
                     <a href="<?= \yii\helpers\Url::to(['goods/gallery', 'id' => $good->id]) ?>"
