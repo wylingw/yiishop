@@ -95,28 +95,31 @@ class GoodsCategoryController extends Controller
                 if ($model->validate()) {
                     //找到对应goods_id的商品
                     $goods_id = $model->goods_id;
-                    // var_dump($goods_id);die();
-                    $carts = Cart::find()->all();
-                    $arrs = [];
-                    foreach ($carts as $cart) {
-                        $arrs[$cart->goods_id] = $cart->amount;
+//                     var_dump($goods_id);die();
+                    $carts = Cart::find()->where(['user_id' => $id])->all();
+                    //var_dump($carts);die();
+                    if (isset($carts)) {
+                        $arrs = [];
+                        foreach ($carts as $cart) {
+                            $arrs[$cart->goods_id] = $cart->amount;
+                        }
+                        // var_dump($arrs);die();
+                        //判断该数据表中是否已有加入的商品
+                        if (array_key_exists($goods_id, $arrs)) {
+                            $arrs[$goods_id] += $amount;
+                            $model->amount = $arrs[$goods_id];
+                            //保存
+                            $m = Cart::findOne(['goods_id' => $goods_id]);
+                            //var_dump($m);die();
+                            $m->updateAttributes(['amount' => $model->amount]);
+                        } else {
+                            //保存
+                            $model->user_id = $id;
+                            $model->save();
+
+                        }
                     }
-                    //var_dump($arrs);die();
-                    //判断该数据表中是否已有加入的商品
-                    if (array_key_exists($goods_id, $arrs)) {
-                        $arrs[$goods_id] += $amount;
-                        $model->amount = $arrs[$goods_id];
-                        //保存
-                        $m = Cart::findOne(['goods_id' => $goods_id]);
-                        //var_dump($m);die();
-                        $m->updateAttributes(['amount' => $model->amount]);
-                    } else {
-                        $arrs[$goods_id] = $amount;
-                        $model->amount = $arrs[$goods_id];
-                        //保存
-                        $model->user_id = $id;
-                        $model->save();
-                    }
+
 
                 } else {
                     var_dump($model->getErrors());
@@ -164,6 +167,7 @@ class GoodsCategoryController extends Controller
             }
 
             $id = array_keys($carts);
+            //var_dump($id);die();
             $goods = Cart::find()->select('goods_id,amount')->andWhere(['goods_id' => $id])->all();
             //var_dump($goods);die();
 
@@ -185,12 +189,27 @@ class GoodsCategoryController extends Controller
                     $cookies = \Yii::$app->response->cookies;
                     $cookies->remove($cookie);
 
-
-                } else {
-                    $m = new Cart();
-                    $m->amount = $carts[$goods_id];
-                    $m->save();
                 }
+            } else {
+                $g = new Cart();
+                $gids = Goods::find()->where(['id' => $id])->all();
+                // var_dump($id);die();
+                if ($gids) {
+                    foreach ($gids as $good) {
+                        $g->amount = $carts[$good->id];
+                        //var_dump($g->amount);die();
+                        $g->goods_id = $good->id;
+
+                    }
+                    $g->user_id = \Yii::$app->user->id;
+                    $g->save();
+                    //清空cookie
+                    $cookie = new Cookie();
+                    $cookie->name = 'carts';
+                    $cookies = \Yii::$app->response->cookies;
+                    $cookies->remove($cookie);
+                }
+
             }
 
 
@@ -231,10 +250,9 @@ class GoodsCategoryController extends Controller
             } else {
                 $carts = [];
             }
-            if ($amount) {
+            if ($amount != 0) {
                 $carts[$goods_id] = $amount;
-                var_dump($carts[$goods_id]);
-                die();
+
             } else {
                 unset($carts[$goods_id]);
             }
@@ -245,7 +263,16 @@ class GoodsCategoryController extends Controller
             $cookies = \Yii::$app->response->cookies;
             $cookies->add($cookie);
         } else {
-
+            $user_id = \Yii::$app->user->id;
+            $model = Cart::findOne(['user_id' => $user_id, 'goods_id' => $goods_id]);
+            if ($model) {
+                if ($amount != 0) {
+                    $model->amount = $amount;
+                    $model->save();
+                } else {
+                    $model->delete();
+                }
+            }
         }
 
     }
@@ -364,5 +391,24 @@ class GoodsCategoryController extends Controller
 
         //调用页面
         return $this->render('order');
+    }
+
+    //我的订单
+    public function actionOwn()
+    {
+        //查询订单详情表所有数据
+        $id = \Yii::$app->user->id;
+        $goods = OrderGoods::find()->where(['user_id' => $id])->all();
+        $ids = OrderGoods::getOrderOptions();
+        $orders = Order::find()->where(['id' => $ids])->all();
+        //var_dump($orders);die();
+        foreach ($orders as $order) {
+            $name = $order->name;
+            $time = date('Y-m-d H:i:s', $order->create_time);
+            $status = $order->status;
+        }
+
+        //调用页面
+        return $this->render('own', ['goods' => $goods, 'name' => $name, 'time' => $time, 'status' => $status]);
     }
 }
